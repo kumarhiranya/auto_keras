@@ -7,4 +7,3 @@ Created on Tue Apr 30 20:50:18 2019
 
 import autokeras
 from keras.preprocessing.image import ImageDataGenerator
-
