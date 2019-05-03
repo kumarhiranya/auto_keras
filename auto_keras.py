@@ -39,7 +39,7 @@ if not os.path.exists(OUTPUT_PATH):
 
 # initialize the list of training times that we'll allow
 # Auto-Keras to train for
-TRAINING_TIMES = np.array([2, 6, 12])*3600
+TRAINING_TIMES = np.array([4, 8, 16, 24])*3600
 
 # load the training and testing data, then scale it into the
 # range [0, 1]
@@ -52,18 +52,22 @@ testX = testX.astype("float") / 255.0
 labelNames = ["airplane", "automobile", "bird", "cat", "deer",
     "dog", "frog", "horse", "ship", "truck"]
 
+modelSearches = {}
 # loop over the number of seconds to allow the current Auto-Keras
 # model to train for
 for seconds in TRAINING_TIMES:
     # train our Auto-Keras model
     print("[INFO] training model for {} seconds max...".format(
         seconds))
-    model = ak.ImageClassifier(verbose=True)
+    model = ak.ImageClassifier(verbose=False)
     try:
         model.fit(trainX, trainY, time_limit=seconds)
     except TimeoutError:
-        print("TimeoutError: ", seconds)
+        modelSearches[seconds] = ['failed', model]
+        print("TimeoutError: couldn't find a model in the given time:", seconds/3600,"hrs")
         continue
+    print("Found a model in the given time:", seconds/3600,"hrs")
+    modelSearches[seconds] = ['success', model]
     model.final_fit(trainX, trainY, testX, testY, retrain=True)
 
     # evaluate the Auto-Keras model
